@@ -1,3 +1,6 @@
+# Copyright (c) 2026 Gabriel Baranello
+# SPDX-License-Identifier: MIT
+
 import asyncio
 import json
 from pathlib import Path

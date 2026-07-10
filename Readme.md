@@ -1,25 +1,72 @@
-# moonrake-creality-cfs-bridge
-This is a bridge via Moonraker to use Creality's CFS's (Creality Filament System) old protocol instead of the new one. This allows for compatibility with slicing software that has not yet been updated to support the new protocol.
+# Creality CFS Fix – OrcaSlicer Doesn't Detect the CFS
+
+If OrcaSlicer cannot detect your Creality CFS when using Moonraker/Fluidd, or it trows error "OrcaSlicer cannot connect to < printer name >. Check if the printer is turned on and connected to the network." this project restores compatibility without requiring any modifications to OrcaSlicer.
+
+Unlike other solutions, this project does not require recompiling or patching OrcaSlicer. Everything runs on the printer through a lightweight Moonraker component.
+
+## Symptoms
+
+You may experience one or more of these issues:
+
+- OrcaSlicer shows no CFS.
+- No filament slots appear.
+- Automatic filament synchronization does not work.
+- The printer is connected, but the CFS is missing.
+- OrcaSlicer behaves as if the printer had no multi-material system.
+
 ## The problem
-Creality's new firmware has introduced changes that break compatibility with the original CFS protocol. This has caused issues for slicing software to be able to communicate with the printer correctly. New firmware versions use a different protocol for the CFS, which can lead to errors when trying to sinc the CFS with a slicing software that hasn't been updated to support the new protocol.
+
+Creality firmware exposes CFS information using a proprietary `box` object instead of the `lane_data` structure expected by OrcaSlicer's Moonraker integration.
+
+Because of this mismatch, OrcaSlicer cannot recognize the installed CFS even though the printer reports it correctly.
+
 ## The solution
-use a moonraker custom component to translate the new protocol to the old one, allowing slicing software to communicate with the printer correctly whitout it nowing about the new protocol.
-## How to install
-1. [Root your printer](https://www.youtube.com/watch?v=9YtvhT4Tx_E) and conect via ssh to it.
-2. Download the .zip file of moonraker-creality-cfs-bridge from the green `<> code` button and extract it to a USB drive in a way that this document is in the root directory.
-3. Plug the USB drive into your printer.
-4. Run:
+
+This Moonraker component acts as a compatibility bridge. It reads Creality's `box` object, converts it into the standard `lane_data` format expected by OrcaSlicer, and stores it in the Moonraker database.
+
+As a result, OrcaSlicer detects the CFS normally without requiring any modifications or recompilation.
+
+## Features
+
+- No OrcaSlicer patch required
+- No firmware modification
+- Runs entirely inside Moonraker
+- Converts Creality `box` → standard `lane_data`
+- Automatic updates while the printer is running
+- Compatible with Creality printers that expose the box Klipper object (K1, K1 Max, K1C, and potentially other CFS-enabled models).
+
+## Requirements
+
+- Rooted printer
+- Moonraker
+- Creality CFS
+
+## Installation
+
+1. Root your printer (for example using the guide below) and connect to it through SSH.
+
+   https://www.youtube.com/watch?v=9YtvhT4Tx_E
+
+2. Download the ZIP from **Code → Download ZIP**.
+
+3. Extract it to a USB drive so that this README is located in the root of the drive.
+
+4. Insert the USB drive into the printer.
+
+5. Run:
+
 ```bash
 cd /tmp/udisk/sda1/
 ```
 
-* If it says `bash: /tmp/udisk/sda1/: No such file or directory`
-then run:
+If that directory does not exist, use:
+
 ```bash
 cd /tmp/udisk/sda/
 ```
 
-* Run the install script:
+Then install:
+
 ```bash
 chmod +x install.sh
 ./install.sh
